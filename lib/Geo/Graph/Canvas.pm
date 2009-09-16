@@ -62,8 +62,6 @@ sub png_overlay {
 # Locate the X,Y location on the image we wish to localize the image to
     my $pixel_point = $self->coord_to_pixel($tile_coords);
 
-warn "$tile_coords->[0],$tile_coords->[1] => $pixel_point->[0],$pixel_point->[1]\n";
-
 # Now place the PNG
     $self->{gd_obj}->copyResized(
         $tile_img_obj,
@@ -81,8 +79,6 @@ sub line {
 # Draw a line between two coordinates
 #
     my ( $self, $start, $end, $rgb ) = @_;
-
-    warn "Mapping from: $start->[1],$start->[0] to $end->[1],$end->[0]\n";
 
     $rgb ||= [0,0,0];
     my $gd_obj = $self->{gd_obj} or return;
@@ -133,8 +129,8 @@ sub coord_to_pixel {
 # TODO optimizations go here
     my $coord_pixel = coord_to_pixels( $coord, $self->{map_geometry} );
     my $offset_x = $coord_pixel->[COORD_X] - $self->{viewport_geometry}[GEOMETRY_OFFSET_X];
-    my $offset_y = $coord_pixel->[COORD_Y] - $self->{viewport_geometry}[GEOMETRY_OFFSET_Y];
-    return [ $offset_x, $offset_y ];
+    my $offset_y = $self->{viewport_geometry}[GEOMETRY_OFFSET_Y] - $coord_pixel->[COORD_Y] + $self->{viewport_geometry}[GEOMETRY_WIDTH];
+    return [ $offset_x, $offset_y - 100 ];
 }
 
 sub lat_pixel_resolution {
@@ -142,13 +138,6 @@ sub lat_pixel_resolution {
 # Returns latitudinal degrees a pixel spans
 #
     my ( $self ) = @_;
-
-    warn "\n$self->{map_geometry}[GEOMETRY_OFFSET_Y],$self->{map_geometry}[GEOMETRY_OFFSET_X]\n".
-    ( 
-      ($self->{map_geometry}[GEOMETRY_OFFSET_Y]+$self->{map_geometry}[GEOMETRY_HEIGHT])  .",".
-      ($self->{map_geometry}[GEOMETRY_OFFSET_X]+$self->{map_geometry}[GEOMETRY_WIDTH]) 
-    )."\n";
-
     return $self->{map_geometry}[GEOMETRY_HEIGHT]/$self->{viewport_geometry}[GEOMETRY_HEIGHT];
 }
 

@@ -160,8 +160,8 @@ sub iterator_next {
 # reference in the format:
 #
 #      [
-#          $latitude,
 #          $longitude,
+#          $latitude,
 #          $altitude,
 #          { additional metadata }
 #      ]

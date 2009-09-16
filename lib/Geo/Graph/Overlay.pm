@@ -51,5 +51,11 @@ sub range {
     return;
 }
 
+sub canvas_draw {
+# --------------------------------------------------
+    my ( $self ) = shift;
+    die ref($self)."::canvas_draw has not been defined yet.";
+    return;
+}
 
 1;

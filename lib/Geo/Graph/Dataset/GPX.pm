@@ -162,7 +162,7 @@ sub iterator_next {
     my ( $lat, $lon ) = unpack( "ff", $point_data );
 
 # Now we can create the lat/lon/elevation record
-    my $rec = [ $lat, $lon, 0, {} ];
+    my $rec = [ $lon, $lat, 0, {} ];
     return $rec;
 }
 

@@ -58,7 +58,7 @@ sub pixels_to_coord {
     my $lat    = rad2deg(atan(sinh( - $PI * ( 1-2*$image_coord->[COORD_Y]/$height ) )));
 
 # Done!
-    return [$lat,$lon];
+    return [$lon,$lat];
 
 }
 

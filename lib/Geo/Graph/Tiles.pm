@@ -66,6 +66,61 @@ sub map_geometry {
     return $map_geometry;
 }
 
+sub viewport_geometry {
+# --------------------------------------------------
+# Assuming we know what the full extents of the map are, we can
+# now calculate the offset for the viewport. Perhaps at some
+# point in the future , it'll be possible to calculate optimal 
+# viewport size based upon the dataset but not yet.
+#
+    my ( $self, 
+         $map_range, 
+         $viewport_geometry, 
+         $viewport_geometry_hint, 
+         $map_geometry,
+         $opts ) = @_;
+
+    $opts ||= {};
+    $viewport_geometry_hint ||= [];
+
+    VIEWPORT_OFFSET_CALC: {
+
+# If the viewport geometry has already got a definition setup,
+# we'll go with that instead
+        if ( defined $viewport_geometry_hint->[GEOMETRY_OFFSET_X] ) {
+            $viewport_geometry->[GEOMETRY_OFFSET_X] = $viewport_geometry_hint->[GEOMETRY_OFFSET_X] || 0;
+            $viewport_geometry->[GEOMETRY_OFFSET_Y] = $viewport_geometry_hint->[GEOMETRY_OFFSET_Y] || 0;
+            $viewport_geometry->[GEOMETRY_OFFSET_Z] = $viewport_geometry_hint->[GEOMETRY_OFFSET_Z] || 0;
+            last;
+        };
+
+# If we got here, we'll see if there already is a provided viewport
+# geometry offset. If that's been set, we'll use that.
+        if ( defined $viewport_geometry->[GEOMETRY_OFFSET_X] ) {
+            last;
+        }
+
+# Okay, we we have to do the calculation for the offset. Let's go
+# about doing that now...
+        my $coord_center = Geo::Graph->range_center( $map_range );
+        my $coord_pixels = coord_to_pixels( $coord_center, $map_geometry );
+
+# Now we work backwards to find out what the viewport geometry should be. We put 
+# the viewport's center to be in the center of the range that we're looking at
+        $viewport_geometry->[GEOMETRY_OFFSET_X] = int( 
+                                                        $coord_pixels->[COORD_X] 
+                                                        - $viewport_geometry->[GEOMETRY_WIDTH] / 2 
+                                                    );
+        $viewport_geometry->[GEOMETRY_OFFSET_Y] = int( 
+                                                        $coord_pixels->[COORD_Y] 
+                                                        - $viewport_geometry->[GEOMETRY_HEIGHT] / 2 
+                                                    );
+        $viewport_geometry->[GEOMETRY_OFFSET_Z] = 0; # TODO not worried about Z yet
+    };
+
+    return $viewport_geometry;
+}
+
 sub zoom_optimize {
 # --------------------------------------------------
 # Attempt to derive the best zoom factor for the job. It's kind of a 
@@ -82,16 +137,16 @@ sub zoom_optimize {
     while ( $zoom <= $self->{zoom_range}[ZOOM_MAX] ) {
 
 # Figure out how the lat/lon rand maps to the pixels
-        my $zoom_pixels = 2**$zoom; my $map_size = [ $zoom_pixels, $zoom_pixels ];
+        my $zoom_pixels = 256*2**$zoom; my $map_size = [ $zoom_pixels, $zoom_pixels ];
         my $coord_ul = coord_to_pixels( [$map_range->[RANGE_MAX_LON],$map_range->[RANGE_MAX_LAT]], $map_size );
         my $coord_lr = coord_to_pixels( [$map_range->[RANGE_MIN_LON],$map_range->[RANGE_MIN_LAT]], $map_size );
 
 #### Handle the longitudinal zoom
-        my $lon_pixels = $coord_lr->[COORD_X] - $coord_ul->[COORD_X];
+        my $lon_pixels = $coord_ul->[COORD_X] - $coord_lr->[COORD_X];
         last if $lon_pixels > $viewport_geometry->[GEOMETRY_WIDTH];
 
 #### Handle the latitudinal zoom
-        my $lat_pixels = $coord_lr->[COORD_Y] - $coord_ul->[COORD_Y];
+        my $lat_pixels = $coord_ul->[COORD_Y] - $coord_lr->[COORD_Y];
         last if $lat_pixels > $viewport_geometry->[GEOMETRY_HEIGHT];
 
         $zoom++;
