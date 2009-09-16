@@ -2,6 +2,7 @@ package Geo::Graph::Overlay;
 
 use strict;
 use Geo::Graph::Base
+    ISA => 'Geo::Graph::Base',
     GEO_ATTRIBS => {
         data    => [],
         dataset => undef,

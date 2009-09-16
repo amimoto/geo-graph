@@ -149,6 +149,41 @@ sub lon_pixel_resolution {
     return $self->{map_geometry}[GEOMETRY_WIDTH]/$self->{viewport_geometry}[GEOMETRY_WIDTH];
 }
 
+sub hsv_to_rgb {
+# --------------------------------------------------
+# Turns hue-saturation-value to rgb
+# $h float 0-360 [?] Degrees on the HSV wheel
+# $s float 0-1   [1] Saturation
+# $v float 0-1   [1] Value
+# $m float 0>    [255] Maxmimum individual RGB channel value
+#
+    my ($h,$s,$v,$m) = @_;
+
+    defined $v or $v = 1;
+    defined $s or $s = 1;
+    defined $m or $m = 255;
+    my $hi    = int($h); # int = floor
+    my $fract = $h - $hi;
+    my $min   = $m * (1-$s);
+    my $delta = $m - $min;
+
+# Create the base offsets for individual colours
+    my $r = ( ( $hi + 120 ) % 360 ) + $fract;
+    my $g =   ( $hi % 360 ) + $fract;
+    my $b = ( ( $hi - 120 + 360 ) % 360 ) + $fract;
+
+# Find out what hue the colour is and apply the saturation/value modifiers
+    my @rgb = map {
+                my $c = $_ <= 60  ? ( $_ / 60 * $delta + $min  ):
+                        $_ <= 180 ? $m :
+                        $_ <= 240 ? ( ( 240 - $_ ) / 60 ) * $delta + $min
+                                  : $min;
+                $c * $v;
+            } ( $r, $g, $b );
+
+    return \@rgb;
+}
+
 sub AUTOLOAD {
 # --------------------------------------------------
     my $self = shift;

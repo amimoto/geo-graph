@@ -1,13 +1,13 @@
 package Geo::Graph::Overlay::Track;
 
 use strict;
-use vars qw/ @ISA /;
 use Geo::Graph::Overlay;
-@ISA = 'Geo::Graph::Overlay';
-
-sub track {
-# --------------------------------------------------
-}
+use Geo::Graph::Base
+    ISA => 'Geo::Graph::Overlay',
+    GEO_ATTRIBS => {
+        thickness => 5,
+        colour    => [255,0,0], # by default we make the route red
+    };
 
 sub range {
 # --------------------------------------------------
@@ -29,15 +29,18 @@ sub canvas_draw {
 
     $dataset->iterator_reset;
     my $prev_entry = $dataset->iterator_next;
-    $canvas_obj->setThickness(5);
+    $canvas_obj->setThickness($self->{thickness}||5);
+    my $rgb = $self->{colour};
     while ( my $entry = $dataset->iterator_next ) {
+        my $segment_colour = ref $rgb eq 'CODE' ? $rgb->( $prev_entry, $entry, $canvas_obj ) : $rgb;
         $canvas_obj->line(
             $prev_entry,
-            $entry
+            $entry,
+            $segment_colour
         );
         $prev_entry = $entry;
     }
-    
+
     return 1;
 }
 

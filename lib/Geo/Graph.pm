@@ -13,7 +13,7 @@ use constant {
         IMAGE_DIRTY          => 1,
         IMAGE_CLEAN          => 0,
 
-        VIEWPORT_GEOMETRY_DEFAULT => [640,480],
+        VIEWPORT_GEOMETRY_DEFAULT => [6400,4800],
 
         COORD_X              => 0,
         COORD_Y              => 1,

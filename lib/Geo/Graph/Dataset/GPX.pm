@@ -4,6 +4,7 @@ use strict;
 use vars qw/ $LOCAL_SELF @TS /;
 use XML::Parser;
 use Time::Local;
+use Geo::Graph qw/:all/;
 use constant {
         SIZEOF_f => length(pack("f",0)), # this is probably paranoia
         SIZEOF_L => length(pack("L",0)),
@@ -161,8 +162,18 @@ sub iterator_next {
     my $point_data    = substr( $self->{track_active}{track_points}, $points_offset * 2, SIZEOF_f * 2 );
     my ( $lat, $lon ) = unpack( "ff", $point_data );
 
+# When was this point taken
+    my $time_tics = 0;
+    if ( $self->{track_active}{track_times} ) {
+        my $time_data = substr( $self->{track_active}{track_times}, SIZEOF_L * $i, SIZEOF_L );
+        if ( defined $time_data ) {
+            $time_tics = unpack("L",$time_data);
+        }
+    }
+
 # Now we can create the lat/lon/elevation record
     my $rec = [ $lon, $lat, 0, {} ];
+    $time_tics and $rec->[REC_METADATA]{time_tics} = $time_tics;
     return $rec;
 }
 
