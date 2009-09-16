@@ -1,0 +1,6 @@
+Revision history for Perl extension Geo::Graph.
+
+0.01  Mon Aug 10 09:18:32 2009
+	- original version; created by h2xs 1.23 with options
+		-X -n Geo::Graph -b 5.6.0
+
