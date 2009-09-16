@@ -6,6 +6,10 @@ WriteMakefile(
     NAME              => 'Geo::Graph',
     VERSION_FROM      => 'lib/Geo/Graph.pm', # finds $VERSION
     PREREQ_PM         => { # e.g., Module::Name => 1.1
+        'GD'              => undef,
+        'Geo::OSM::Tiles' => undef,
+        'Math::Trig'      => undef,
+        'XML::Parser'     => undef,
     }, 
 
     ( ## Add these new keywords supported since 5.005
