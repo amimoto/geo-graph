@@ -108,11 +108,11 @@ sub tile_store {
 
 # Check the cache if we have one
     CACHE_SAVE: {
-        my $cache_path = $self->{cache_path} or last CACHE_LOAD;
+        my $cache_path = $self->{cache_path} or last CACHE_SAVE;
 
         my $cache_fpath = "$cache_path/osm-$zoom-$tile_x-$tile_y.png";
 
-        open my $fh, ">$cache_fpath" or last CACHE_LOAD;
+        open my $fh, ">$cache_fpath" or last CACHE_SAVE;
         binmode $fh;
         print $fh $$data_ref;
         close $fh;
