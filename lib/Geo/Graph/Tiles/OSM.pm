@@ -93,6 +93,9 @@ sub tile_fetch {
     my $url_path = "http://tile.openstreetmap.org/" . tile2path($tile_x,$tile_y,$zoom);
     my $data = get( $url_path );
 
+# Store the tile data in the cache if the cache path has been set
+    $self->tile_store($tile_x,$tile_y,$zoom,\$data);
+
     return \$data;
 };
 
@@ -101,6 +104,22 @@ sub tile_store {
 # Saves a single tile from OSM. Returns the raw PNG
 # data.
 #
+    my ( $self, $tile_x, $tile_y, $zoom, $data_ref ) = @_;
+
+# Check the cache if we have one
+    CACHE_SAVE: {
+        my $cache_path = $self->{cache_path} or last CACHE_LOAD;
+
+        my $cache_fpath = "$cache_path/osm-$zoom-$tile_x-$tile_y.png";
+
+        open my $fh, ">$cache_fpath" or last CACHE_LOAD;
+        binmode $fh;
+        print $fh $$data_ref;
+        close $fh;
+    };
+
+    return $data_ref;
+
 }
 
 sub tile_coord {
