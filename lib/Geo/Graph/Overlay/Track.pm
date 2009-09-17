@@ -42,9 +42,6 @@ sub canvas_draw {
         $prev_entry = $entry;
     }
 
-    my $range_center = Geo::Graph->range_center($self->range);
-    $canvas_obj->circle( $range_center, 6, [255,0,0] );
-
     return 1;
 }
 
