@@ -34,15 +34,6 @@ sub new {
                             1 # Turn truecolor on
                         );
 
-# Now we need to calculate where the viewport needs to go if it hasn't
-# been defined yet
-    if ( defined $viewport_geometry->[GEOMETRY_OFFSET_X] ) {
-        my $center_coord = Geo::Graph->range_center( $self->{map_range} );
-        my $center_pixel = coord_to_pixels( $center_coord, $self->{map_geometry} );
-        $viewport_geometry->[GEOMETRY_OFFSET_X] = $center_pixel->[COORD_X] - int($viewport_geometry->[GEOMETRY_WIDTH]  / 2);
-        $viewport_geometry->[GEOMETRY_OFFSET_Y] = $center_pixel->[COORD_Y] - int($viewport_geometry->[GEOMETRY_HEIGHT] / 2);
-    };
-
     return $self;
 }
 
@@ -102,7 +93,7 @@ sub circle {
 #
     my ( $self, $coord, $radius, $rgb ) = @_;
 
-    $radius ||= 6;
+    $radius ||= 10;
     $rgb    ||= [255,255,255];
 
     my $gd_obj = $self->{gd_obj} or return;
@@ -129,8 +120,8 @@ sub coord_to_pixel {
 # TODO optimizations go here
     my $coord_pixel = coord_to_pixels( $coord, $self->{map_geometry} );
     my $offset_x = $coord_pixel->[COORD_X] - $self->{viewport_geometry}[GEOMETRY_OFFSET_X];
-    my $offset_y = $self->{viewport_geometry}[GEOMETRY_OFFSET_Y] - $coord_pixel->[COORD_Y] + $self->{viewport_geometry}[GEOMETRY_WIDTH];
-    return [ $offset_x, $offset_y - 100 ];
+    my $offset_y = $self->{viewport_geometry}[GEOMETRY_OFFSET_Y] - $coord_pixel->[COORD_Y] + $self->{viewport_geometry}[GEOMETRY_HEIGHT];
+    return [ $offset_x, $offset_y ];
 }
 
 sub lat_pixel_resolution {

@@ -126,7 +126,7 @@ sub tile_coord {
 # --------------------------------------------------
     my ( $self, $tile_x, $tile_y, $zoom ) = @_;
     my $lon = $tile_x / 2**$zoom * 360 - 180;
-    my $n   = 3.14156 - 2 * 3.14156 * $tile_y / 2**$zoom;
+    my $n   = 3.14156 - ( 2 * 3.14156 * $tile_y ) / 2**$zoom;
     my $lat = 180/3.14156 * atan(.5*(exp($n)-exp(-$n)));
     return [ $lon, $lat, 0 ]; # return in coordinate format
 }

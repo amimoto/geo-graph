@@ -7,6 +7,7 @@ use Geo::Graph::Base
     GEO_ATTRIBS => {
         thickness => 5,
         colour    => [255,0,0], # by default we make the route red
+        range     => undef,
     };
 
 sub range {
@@ -16,7 +17,7 @@ sub range {
 #
     my ( $self ) = @_;
     my $dataset = $self->{data} or return;
-    return $dataset->range;
+    return $self->{range} ||= $dataset->range;
 }
 
 sub canvas_draw {
@@ -40,6 +41,9 @@ sub canvas_draw {
         );
         $prev_entry = $entry;
     }
+
+    my $range_center = Geo::Graph->range_center($self->range);
+    $canvas_obj->circle( $range_center, 6, [255,0,0] );
 
     return 1;
 }
