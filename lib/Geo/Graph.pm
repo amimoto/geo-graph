@@ -45,6 +45,11 @@ use constant {
         REC_ALTITUDE         => 2,
         REC_METADATA         => 3,
 
+        THIN_BY_DISTANCE     => 'thin_by_distance',
+        THIN_BY_TIME         => 'thin_by_time',
+        THIN_TO_COUNT        => 'thin_to_count',
+
+
         ZOOM_MIN             => 0,
         ZOOM_MAX             => 1,
     };
@@ -90,6 +95,10 @@ use constant {
     REC_LONGITUDE
     REC_ALTITUDE
     REC_METADATA
+
+    THIN_BY_DISTANCE
+    THIN_BY_TIME
+    THIN_TO_COUNT
 
     ZOOM_MIN
     ZOOM_MAX

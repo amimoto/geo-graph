@@ -4,7 +4,7 @@ use strict;
 use vars qw/ $HAS_GPSBABEL $HANDLER_MAP $HANDLER_DEFAULT /;
 
 use Geo::Graph qw/ :constants /;
-use Geo::Graph::Mercator;
+use Geo::Graph::Utils;
 use Geo::Graph::Base
     ISA => 'Geo::Graph::Base',
     GEO_ATTRIBS => {

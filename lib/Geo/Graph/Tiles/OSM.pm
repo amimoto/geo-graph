@@ -3,7 +3,7 @@ package Geo::Graph::Tiles::OSM;
 use strict;
 use LWP::Simple;
 use Math::Trig;
-use Geo::Graph::Mercator;
+use Geo::Graph::Utils;
 use Geo::OSM::Tiles qw/ :all /;
 use Geo::Graph qw/:constants/;
 use Geo::Graph::Tiles;

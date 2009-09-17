@@ -1,4 +1,4 @@
-package Geo::Graph::Mercator;
+package Geo::Graph::Utils;
 
 use strict;
 use Exporter;
