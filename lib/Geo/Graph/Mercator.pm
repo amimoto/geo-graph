@@ -8,10 +8,10 @@ use vars qw/ @ISA @EXPORT $PI /;
 
 @ISA = 'Exporter';
 
-@EXPORT = qw( coord_to_pixels pixels_to_coord );
+@EXPORT = qw( wgs84_to_cartesian cartesian_to_wgs84 );
 $PI = 3.14159290045661;
 
-sub coord_to_pixels {
+sub wgs84_to_cartesian {
 # --------------------------------------------------
 # Given Lat/Lon coordinates, returns an x,y pair where
 # x and y range between 0 and 1, unless image geometry
@@ -38,7 +38,7 @@ sub coord_to_pixels {
     return [$x,$y];
 }
 
-sub pixels_to_coord {
+sub cartesian_to_wgs84 {
 # --------------------------------------------------
 # Given an x,y pair, where x and y range between 0 and 1
 # returns a lat/long coordinate

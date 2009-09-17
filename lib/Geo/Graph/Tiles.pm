@@ -103,7 +103,7 @@ sub viewport_geometry {
 # Okay, we we have to do the calculation for the offset. Let's go
 # about doing that now...
         my $coord_center = Geo::Graph->range_center( $map_range );
-        my $coord_pixels = coord_to_pixels( $coord_center, $map_geometry );
+        my $coord_pixels = wgs84_to_cartesian( $coord_center, $map_geometry );
 
 # Now we work backwards to find out what the viewport geometry should be. We put 
 # the viewport's center to be in the center of the range that we're looking at
@@ -138,8 +138,8 @@ sub zoom_optimize {
 
 # Figure out how the lat/lon rand maps to the pixels
         my $zoom_pixels = 256*2**$zoom; my $map_size = [ $zoom_pixels, $zoom_pixels ];
-        my $coord_ul = coord_to_pixels( [$map_range->[RANGE_MAX_LON],$map_range->[RANGE_MAX_LAT]], $map_size );
-        my $coord_lr = coord_to_pixels( [$map_range->[RANGE_MIN_LON],$map_range->[RANGE_MIN_LAT]], $map_size );
+        my $coord_ul = wgs84_to_cartesian( [$map_range->[RANGE_MAX_LON],$map_range->[RANGE_MAX_LAT]], $map_size );
+        my $coord_lr = wgs84_to_cartesian( [$map_range->[RANGE_MIN_LON],$map_range->[RANGE_MIN_LAT]], $map_size );
 
 #### Handle the longitudinal zoom
         my $lon_pixels = $coord_ul->[COORD_X] - $coord_lr->[COORD_X];

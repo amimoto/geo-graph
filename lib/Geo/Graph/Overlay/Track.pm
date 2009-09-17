@@ -5,7 +5,7 @@ use Geo::Graph::Overlay;
 use Geo::Graph::Base
     ISA => 'Geo::Graph::Overlay',
     GEO_ATTRIBS => {
-        thickness => 5,
+        thickness => 2,
         colour    => [255,0,0], # by default we make the route red
         range     => undef,
     };
@@ -30,7 +30,7 @@ sub canvas_draw {
 
     $dataset->iterator_reset;
     my $prev_entry = $dataset->iterator_next;
-    $canvas_obj->setThickness($self->{thickness}||5);
+    $canvas_obj->setThickness($self->{thickness}||2);
     my $rgb = $self->{colour};
     while ( my $entry = $dataset->iterator_next ) {
         my $segment_colour = ref $rgb eq 'CODE' ? $rgb->( $prev_entry, $entry, $canvas_obj ) : $rgb;

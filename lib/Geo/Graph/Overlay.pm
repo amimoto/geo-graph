@@ -38,7 +38,7 @@ sub range {
 # --------------------------------------------------
 # This should be overriden by the subclass to return
 # the maxium boundaries (range) that this overlay
-# layer will take. Four parameters are returned
+# layer will take. Six parameters are returned
 #
 # 1. min latitude
 # 2. min longitude

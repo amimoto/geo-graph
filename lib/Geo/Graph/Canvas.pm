@@ -118,7 +118,7 @@ sub coord_to_pixel {
 #
     my ( $self, $coord ) = @_;
 # TODO optimizations go here
-    my $coord_pixel = coord_to_pixels( $coord, $self->{map_geometry} );
+    my $coord_pixel = wgs84_to_cartesian( $coord, $self->{map_geometry} );
     my $offset_x = $coord_pixel->[COORD_X] - $self->{viewport_geometry}[GEOMETRY_OFFSET_X];
     my $offset_y = $self->{viewport_geometry}[GEOMETRY_OFFSET_Y] - $coord_pixel->[COORD_Y] + $self->{viewport_geometry}[GEOMETRY_HEIGHT];
     return [ $offset_x, $offset_y ];

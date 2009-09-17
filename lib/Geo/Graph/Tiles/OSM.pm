@@ -27,11 +27,11 @@ sub canvas_tiles_draw {
     my $zoom              = $map_geometry->[GEOMETRY_OPTIONS]{zoom} || 0;
 
 # We know what the viewport geometry is, so we work backwards from those pixel extents
-    my $ul_coord   = pixels_to_coord( 
+    my $ul_coord   = cartesian_to_wgs84( 
                             [ $viewport_geometry->[GEOMETRY_OFFSET_X], $viewport_geometry->[GEOMETRY_OFFSET_Y] ],
                             $map_geometry 
                         );
-    my $lr_coord   = pixels_to_coord( 
+    my $lr_coord   = cartesian_to_wgs84( 
                             [ 
                                 $viewport_geometry->[GEOMETRY_OFFSET_X] + $viewport_geometry->[GEOMETRY_WIDTH], 
                                 $viewport_geometry->[GEOMETRY_OFFSET_Y] + $viewport_geometry->[GEOMETRY_HEIGHT],
