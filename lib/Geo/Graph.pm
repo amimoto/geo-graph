@@ -22,6 +22,8 @@ use constant {
         COORD_LAT            => 1,
         COORD_ALT            => 2,
 
+        EARTH_RADIUS         => 6372797.6,
+
         GEOMETRY_WIDTH       => 0,
         GEOMETRY_HEIGHT      => 1,
         GEOMETRY_DEPTH       => 2,
@@ -43,7 +45,8 @@ use constant {
         REC_LONGITUDE        => 0,
         REC_LATITUDE         => 1,
         REC_ALTITUDE         => 2,
-        REC_METADATA         => 3,
+        REC_TIMESTAMP        => 3,
+        REC_METADATA         => 4,
 
         THIN_BY_DISTANCE     => 'thin_by_distance',
         THIN_BY_TIME         => 'thin_by_time',
@@ -72,6 +75,8 @@ use constant {
     COORD_LON
     COORD_LAT
     COORD_ALT
+
+    EARTH_RADIUS
 
     GEOMETRY_WIDTH
     GEOMETRY_HEIGHT

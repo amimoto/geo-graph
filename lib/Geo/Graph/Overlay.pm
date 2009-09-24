@@ -4,6 +4,7 @@ use strict;
 use Geo::Graph::Base
     ISA => 'Geo::Graph::Base',
     GEO_ATTRIBS => {
+        name    => undef, # if you want to name an overlay
         data    => [],
         dataset => undef,
         range   => undef, # [0,0,0 => 0,0,0],
