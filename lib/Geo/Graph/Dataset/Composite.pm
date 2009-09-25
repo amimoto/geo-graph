@@ -16,7 +16,8 @@ sub dataset_insert {
 # --------------------------------------------------
 # Insert a new dataset
 #
-    return push @{shift()->{datasets}}, @_;
+    my $self = shift;
+    return push @{$self->{datasets}}, @_;
 }
 
 sub dataset_splice {
@@ -24,7 +25,20 @@ sub dataset_splice {
 # Does the same thing as perl's splice on the
 # dataset
 #
-    return splice @{shift()->{datasets}}, @_;
+    my $self = shift;
+    my @removed = splice @{$self)->{datasets}}, @_;
+
+# Ensure we're not actively pointing to a dead dataset if we've pruned it
+    if ( $self->{dataset_selected} ) {
+        for ( @removed ) {
+            next unless $_ eq $self->{dataset_selected};
+            $self->{dataset_selected} = undef;
+            last;
+        }
+    }
+
+# Now respond to the user as they expected things to work
+    return wantarray ? @removed : 0+@removed;
 }
 
 sub dataset_select {
@@ -35,7 +49,7 @@ sub dataset_select {
     return $self->{dataset_selected} = $self->{dataset}[$i];
 }
 
-sub range {
+sub dataset_range {
 # --------------------------------------------------
     my ( $self ) = @_;
     return $self->{_range} if $self->{_range};
