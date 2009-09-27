@@ -6,12 +6,7 @@ use vars qw/ @TEST_MODULES /;
     GD
     Geo::Graph
     Geo::Graph::Base
-    Geo::Graph::Canvas
-    Geo::Graph::Overlay
-    Geo::Graph::Overlay::Track
     Geo::Graph::Dataset
-    Geo::Graph::Dataset::GPX
-    Geo::Graph::Mercator
 );
 
 require Test::More;

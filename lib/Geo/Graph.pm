@@ -1,10 +1,14 @@
 package Geo::Graph;
 
 use strict;
-use vars qw/$GEO_ATTRIBS $VERSION @EXPORT_OK %EXPORT_TAGS @CONSTANTS @ISA/;
-use Geo::Graph::Base;
-use Exporter;
-use constant {
+
+use vars qw/$GEO_ATTRIBS $VERSION @EXPORT_OK %EXPORT_TAGS $CONSTANTS_LOOKUP @CONSTANTS @ISA/;
+
+use constant ( $CONSTANTS_LOOKUP = {
+        DATASET_TRACK        => 'Geo::Graph::Dataset::Primitive::Track',
+        DATASET_SHAPE        => 'Geo::Graph::Dataset::Primitive::Shape',
+        DATASET_WAYPOINTS    => 'Geo::Graph::Dataset::Primitive::Waypoints',
+
         SHAPE_TRACK          => 'Geo::Graph::Overlay::Track',
         SHAPE_POINT          => 'Geo::Graph::Overlay::Point',
         SHAPE_IMAGE          => 'Geo::Graph::Overlay::Image',
@@ -55,59 +59,13 @@ use constant {
 
         ZOOM_MIN             => 0,
         ZOOM_MAX             => 1,
-    };
+    } );
+
+use Geo::Graph::Base;
+use Exporter;
 
 @ISA = qw( Exporter Geo::Graph::Base );
-@CONSTANTS = qw(
-    SHAPE_TRACK
-    SHAPE_POINT
-    SHAPE_IMAGE
-    SHAPE_REGION
-
-    IMAGE_DIRTY
-    IMAGE_CLEAN
-
-    IMAGE_GEOMETRY_DEFAULT
-
-    COORD_X
-    COORD_Y
-    COORD_Z
-    COORD_LON
-    COORD_LAT
-    COORD_ALT
-
-    EARTH_RADIUS
-
-    GEOMETRY_WIDTH
-    GEOMETRY_HEIGHT
-    GEOMETRY_DEPTH
-    GEOMETRY_OFFSET_X
-    GEOMETRY_OFFSET_Y
-    GEOMETRY_OFFSET_Z
-    GEOMETRY_OFFSET_LON
-    GEOMETRY_OFFSET_LAT
-    GEOMETRY_OFFSET_ALT
-    GEOMETRY_OPTIONS
-
-    RANGE_MIN_LAT
-    RANGE_MIN_LON
-    RANGE_MIN_ALT
-    RANGE_MAX_LAT
-    RANGE_MAX_LON
-    RANGE_MAX_ALT
-
-    REC_LATITUDE
-    REC_LONGITUDE
-    REC_ALTITUDE
-    REC_METADATA
-
-    THIN_BY_DISTANCE
-    THIN_BY_TIME
-    THIN_TO_COUNT
-
-    ZOOM_MIN
-    ZOOM_MAX
-);
+@CONSTANTS = keys %$CONSTANTS_LOOKUP;
 
 @EXPORT_OK = ( @CONSTANTS );
 %EXPORT_TAGS = (
@@ -222,7 +180,7 @@ sub range {
 
 sub range_center {
 # --------------------------------------------------
-# Given a range data structure, returns the point 
+# Given a range data structure, returns the point
 # at the center of the range
 #
     my ( $self, $range ) = @_;
@@ -265,7 +223,7 @@ sub generate {
 # we can only hint. The viewport remains constant, however, the
 # scale at which the image will be rendered may vary somewhat.
     my $tile_obj = $self->tile_obj;
-    my $map_geometry = $tile_obj->map_geometry( 
+    my $map_geometry = $tile_obj->map_geometry(
                             $map_range,
                             $viewport_geometry,
                             $self->{viewport_geometry_hint},

@@ -63,16 +63,16 @@ sub new {
     my $basis = copy_struct( $pkg->init_class_attribs );
     my $self = bless $basis, $pkg;
 
-    @_ = $self->pre_init( @_ ) if $self->{_mtkfunc_pre_init};
+    @_ = $self->pre_init( @_ ) if $self->{_geofunc_pre_init};
 
-    if ( $self->{_mtkfunc_init} ) {
+    if ( $self->{_geofunc_init} ) {
         $self->init( @_ );
     }
     else {
         $self->init_instance_attribs( @_ );
     }
 
-    return $self->post_init if $self->{_mtkfunc_post_init};
+    return $self->post_init if $self->{_geofunc_post_init};
     return $self;
 }
 
@@ -87,16 +87,16 @@ sub create {
 
     @$self{ keys %$basis } = values %$basis;
 
-    @_ = $self->pre_init( @_ ) if $self->{_mtkfunc_pre_init};
+    @_ = $self->pre_init( @_ ) if $self->{_geofunc_pre_init};
 
-    if ( $self->{_mtkfunc_init} ) {
+    if ( $self->{_geofunc_init} ) {
         $self->init( @_ );
     }
     else {
         $self->init_instance_attribs( @_ );
     }
 
-    return $self->post_init if $self->{_mtkfunc_post_init};
+    return $self->post_init if $self->{_geofunc_post_init};
     return $self;
 }
 
@@ -107,7 +107,7 @@ sub init_instance_attribs {
 
     foreach my $k ( keys %$self ) {
         next unless exists $opts->{$k};
-        next if $k =~ /^_mtkfunc/;
+        next if $k =~ /^_geofunc/;
         $self->{$k} = $opts->{$k};
     }
 
@@ -142,7 +142,7 @@ sub init_class_attribs {
     }
 
     foreach my $f ( qw( pre_init init post_init ) ) {
-        $u->{"_mtkfunc_" . $f} = $class->can( $f ) ? 1 : 0;
+        $u->{"_geofunc_" . $f} = $class->can( $f ) ? 1 : 0;
     }
 
     ${"${class}::ABSOLUTE_ATTRIBS"} = $u;

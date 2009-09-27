@@ -1,4 +1,4 @@
-package Geo::Graph::Dataset;
+package Geo::Graph::Dataset::Primitive;
 
 # A simple dataset represents a single strip of data.
 # ie. A single track, a single shape, or a group of waypoints
@@ -14,6 +14,22 @@ use Geo::Graph::Base
         iterator_index => 0,
         _range         => undef,
     };
+
+sub new {
+# --------------------------------------------------
+# We support some syntax sugar here. If the instantiation 
+# parameter provided is an arrayref, we assume that they
+# just want to set the data
+#
+    my $pkg = shift;
+    if ( @_ and ref $_[0] eq 'ARRAY' ) {
+        my $data = shift @_;
+        my $self = $pkg->SUPER::new(@_);
+        $self->{data} = $data;
+        return $self;
+    }
+    return $pkg->SUPER::new(@_);
+}
 
 sub insert {
 # --------------------------------------------------

@@ -11,11 +11,9 @@ use Geo::Graph qw/ :constants /;
 use Geo::Graph::Base
     ISA => 'Geo::Graph::Base',
     GEO_ATTRIBS => {
-        data            => undef,
+        dataset         => undef,
         handler_map     => undef,
         handler_default => $HANDLER_DEFAULT,
-        section_index   => 0,
-        iterator_index  => 0,
     };
 
 sub init {
@@ -105,126 +103,6 @@ sub fpath_format_detect {
         return $ext;
     };
     return;
-}
-
-sub sections {
-# --------------------------------------------------
-# Some data types may have multiple sections (eg multiple
-# tracks in a GPX file. Account for this here) This function
-# will return the number of different sections this dataset
-# holds.
-#
-    my ( $self ) = @_;
-    return unless ref $self->{data} eq 'ARRAY';
-    return 1;
-}
-
-sub section_select {
-# --------------------------------------------------
-# Some data types may have multiple sections (eg multiple
-# tracks in a GPX file. Account for this here) This 
-# function will allow the user to choose between multiple 
-# sections for iteration and analysis
-#
-    my ( $self, $section_index ) = @_;
-    return 0 unless my $section_count = $self->sections;
-    return if $section_count < $section_index;
-    return $self->{section_index} = $section_index;
-}
-
-sub entries {
-# --------------------------------------------------
-# Number of GPS points in the dataset
-#
-    my ( $self ) = @_;
-    return unless ref $self->{data} eq 'ARRAY';
-    return 0+@{$self->{data}};
-}
-
-sub iterator_reset {
-# --------------------------------------------------
-# Moves the iterator index to the first entry in the
-# list
-#
-    my ( $self ) = @_;
-    $self->{iterator_index} = 0;
-    return 1;
-}
-
-sub iterator_next {
-# --------------------------------------------------
-# Yields the record the iterator index is currently
-# pointing to. Also increments the iterator index.
-# Each record returned should be simply an array
-# reference in the format:
-#
-#      [
-#          $longitude,
-#          $latitude,
-#          $altitude,
-#          { additional metadata }
-#      ]
-#
-    my ( $self ) = @_;
-    return unless ref $self->{data} eq 'ARRAY';
-    return if $self->entries <= $self->{iterator_index};
-    my $rec = $self->{data}[$self->{iterator_index}++];
-    return $rec;
-}
-
-sub iterator_eof {
-# --------------------------------------------------
-# Returns a true value if the iterator index has reached
-# the limit of the records in this dataset
-#
-    my ( $self ) = @_;
-    return unless ref $self->{data} eq 'ARRAY';
-    return $self->entries <= $self->{iterator_index};
-}
-
-sub range {
-# --------------------------------------------------
-# Usually called by Geo::Graph::Overlay, this returns
-# the boundaries within which this dataset describes.
-# Note that this function may be subclassed to provide
-# better performance
-#
-    my ( $self ) = @_;
-
-    my @range = qw( 10000 10000 10000 -10000 -10000 -10000  );
-
-# Iterate through all the points and find the range of this dataset
-# Yes... it's slow for large datasets. What can I do?
-    $self->iterator_reset;
-    while ( my $point = $self->iterator_next ) {
-
-# Handle latitude range
-        if ( $range[RANGE_MIN_LAT] > $point->[REC_LATITUDE] ) {
-            $range[RANGE_MIN_LAT] = $point->[REC_LATITUDE];
-        }
-        if ( $range[RANGE_MAX_LAT] < $point->[REC_LATITUDE] ) {
-            $range[RANGE_MAX_LAT] = $point->[REC_LATITUDE];
-        }
-
-# Handle longitude range
-        if ( $range[RANGE_MIN_LON] > $point->[REC_LONGITUDE] ) {
-            $range[RANGE_MIN_LON] = $point->[REC_LONGITUDE];
-        }
-        if ( $range[RANGE_MAX_LON] < $point->[REC_LONGITUDE] ) {
-            $range[RANGE_MAX_LON] = $point->[REC_LONGITUDE];
-        }
-
-# Handle altitudinal range
-        if ( $range[RANGE_MIN_ALT] > $point->[REC_ALTITUDE] ) {
-            $range[RANGE_MIN_ALT] = $point->[REC_ALTITUDE];
-        }
-        if ( $range[RANGE_MAX_ALT] < $point->[REC_ALTITUDE] ) {
-            $range[RANGE_MAX_ALT] = $point->[REC_ALTITUDE];
-        }
-
-    }
-
-    return \@range;
 }
 
 1;
