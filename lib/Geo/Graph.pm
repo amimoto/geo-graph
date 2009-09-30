@@ -9,6 +9,12 @@ use constant ( $CONSTANTS_LOOKUP = {
         DATASET_SHAPE        => 'Geo::Graph::Dataset::Primitive::Shape',
         DATASET_WAYPOINTS    => 'Geo::Graph::Dataset::Primitive::Waypoints',
 
+        OVERLAY_TRACK        => 'Geo::Graph::Overlay::Primitive::Track',
+        OVERLAY_POINT        => 'Geo::Graph::Overlay::Primitive::Point',
+        OVERLAY_IMAGE        => 'Geo::Graph::Overlay::Primitive::Image',
+        OVERLAY_REGION       => 'Geo::Graph::Overlay::Primitive::Region',
+
+
         SHAPE_TRACK          => 'Geo::Graph::Overlay::Track',
         SHAPE_POINT          => 'Geo::Graph::Overlay::Point',
         SHAPE_IMAGE          => 'Geo::Graph::Overlay::Image',
@@ -101,6 +107,21 @@ sub new {
     if ( $ENV{GEO_GRAPH_CACHE_PATH} ) {
         $self->{cache_path} = $ENV{GEO_GRAPH_CACHE_PATH};
     };
+
+    return $self;
+}
+
+sub load {
+# --------------------------------------------------
+# Attempt to load a single gps related file/buffer into 
+# the local memory and set it up as the primary datasource
+#
+    my ( $self, $data, $opts ) = @_;
+    require Geo::Graph::Overlay;
+    my $ovl = Geo::Graph::Overlay->load($data);
+
+# Rack it
+    push @{$self->{overlays}}, $ovl;
 
     return $self;
 }

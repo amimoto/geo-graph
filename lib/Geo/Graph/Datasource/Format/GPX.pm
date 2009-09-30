@@ -46,13 +46,12 @@ sub load {
     local $TAG_STACK         = '';
 
 # The parser's input for files and raw buffers is actually different.
-# For file paths
-    if ( -f $data ) { $parser->parsefile($data) }
+    my $success = -f $data ? $parser->parsefile($data) # For file paths
+                           : $parser->parse($data);    # For parsing
+    return if not $success;
 
-# For parsing
-    else { $parser->parse($data) }
-
-    return $self;
+# We return the dataset
+    return $self->{dataset};
 }
 
 sub handle_start {
@@ -72,8 +71,8 @@ sub handle_start {
         push @$LOCAL_TRACK, $LOCAL_TRACK_ENTRY = [
             $attrs{lon},
             $attrs{lat},
-            undef, # altitude
-            undef, # timestamp
+            0, # altitude
+            0, # timestamp
             {}
         ];
     }

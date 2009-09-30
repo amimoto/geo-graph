@@ -1,9 +1,8 @@
-package Geo::Graph::Overlay::Track;
+package Geo::Graph::Overlay::Primitive::Track;
 
 use strict;
-use Geo::Graph::Overlay;
-use Geo::Graph::Base
-    ISA => 'Geo::Graph::Overlay',
+use Geo::Graph::Overlay::Primitive
+    ISA => 'Geo::Graph::Overlay::Primitive',
     GEO_ATTRIBS => {
         thickness => 2,
         colour    => [255,0,0], # by default we make the route red
@@ -16,7 +15,7 @@ sub range {
 # fills (return lat/lon)
 #
     my ( $self ) = @_;
-    my $dataset = $self->{data} or return;
+    my $dataset = $self->{dataset_primitive} or return;
     return $self->{range} ||= $dataset->range;
 }
 
@@ -26,7 +25,7 @@ sub canvas_draw {
 #
     my ( $self, $canvas_obj ) = @_;
 
-    my $dataset = $self->{data} or return;
+    my $dataset = $self->{dataset_primitive} or return;
 
     $dataset->iterator_reset;
     my $prev_entry = $dataset->iterator_next;

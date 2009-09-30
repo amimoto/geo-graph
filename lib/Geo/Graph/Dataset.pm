@@ -11,8 +11,9 @@ use Geo::Graph qw/ :constants /;
 use Geo::Graph::Base
     ISA => 'Geo::Graph::Base',
     GEO_ATTRIBS => {
-        datasets       => [],
-        dataset_selected => undef,
+        dataset_primitives => [],
+        dataset_selected   => undef,
+        iterator_index     => 0,
     };
 
 # Handle any combination of tracks/waypoints/shapes
@@ -88,7 +89,7 @@ sub datasets {
 # have here
 #
     my $self = shift;
-    return 0+@{$self->{datasets}};
+    return 0+@{$self->{dataset_primitives}};
 }
 
 sub dataset_create {
@@ -130,7 +131,7 @@ sub dataset_insert {
 # Insert a new dataset
 #
     my $self = shift;
-    return push @{$self->{datasets}}, @_;
+    return push @{$self->{dataset_primitives}}, @_;
 }
 
 sub dataset_splice {
@@ -139,7 +140,7 @@ sub dataset_splice {
 # dataset
 #
     my $self = shift;
-    my @removed = splice @{$self->{datasets}}, @_;
+    my @removed = splice @{$self->{dataset_primitives}}, @_;
 
 # Ensure we're not actively pointing to a dead dataset if we've pruned it
     if ( $self->{dataset_selected} ) {
@@ -159,7 +160,39 @@ sub dataset_select {
 # Select the active dataset
 #
     my ( $self, $i ) = @_;
-    return ( $self->{dataset_selected} = $self->{datasets}[$i] );
+    return ( $self->{dataset_selected} = $self->{dataset_primitives}[$i] );
+}
+
+
+sub iterator_reset {
+# --------------------------------------------------
+# Moves the iterator index to the first entry in the
+# list
+#
+    $_[0]->{iterator_index} = 0;
+    return 1;
+}
+
+sub iterator_next {
+# --------------------------------------------------
+# Yields the record the iterator index is currently
+# pointing to. Also increments the iterator index.
+# Each record returned should be simply a dataset
+# primitive
+    my ( $self ) = @_;
+    return unless ref $self->{dataset_primitives} eq 'ARRAY';
+    return if $self->datasets <= $self->{iterator_index};
+    return $self->{dataset_primitives}[$self->{iterator_index}++];
+}
+
+sub iterator_eof {
+# --------------------------------------------------
+# Returns a true value if the iterator index has reached
+# the limit of the records in this dataset
+#
+    my ( $self ) = @_;
+    return unless ref $self->{dataset_primitives} eq 'ARRAY';
+    return $self->datasets <= $self->{iterator_index};
 }
 
 sub range {
@@ -167,7 +200,7 @@ sub range {
     my ( $self ) = @_;
     return $self->{_range} if $self->{_range};
 
-    my $datasets = $self->{datasets} or return;
+    my $datasets = $self->{dataset_primitives} or return;
     my @range = qw( 10000 10000 10000 -10000 -10000 -10000  );
     for my $dataset ( @$datasets ) {
 

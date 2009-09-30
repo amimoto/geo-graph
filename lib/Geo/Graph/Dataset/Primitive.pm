@@ -11,6 +11,7 @@ use Geo::Graph::Base
     ISA => 'Geo::Graph::Base',
     GEO_ATTRIBS => {
         data           => [],
+        overlay_hint   => undef,
         iterator_index => 0,
         _range         => undef,
     };

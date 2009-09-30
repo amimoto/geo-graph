@@ -4,11 +4,168 @@ use strict;
 use Geo::Graph::Base
     ISA => 'Geo::Graph::Base',
     GEO_ATTRIBS => {
-        name    => undef, # if you want to name an overlay
-        data    => [],
-        dataset => undef,
-        range   => undef, # [0,0,0 => 0,0,0],
+        name               => undef, # if you want to name an overlay
+        overlay_primitives => [],
+        range              => undef, # [0,0,0 => 0,0,0],
     };
+
+sub new {
+# --------------------------------------------------
+# There is some very specific "tricky" syntax that we'll
+# use here to support some syntax sugar. That is, users
+# can define a sequence of overlay primitives using dataset
+# primives or dataset object
+#
+# Eg:
+#
+#   my $overlay = Geo::Graph::Overlay->new(
+#       $dataset,                            # This can be a Geo::Graph::Dataset object
+#       OVERLAY_TRACK => $dataset_primitive, # Associate a dataset primitive with a particular overlay object
+#       $dataset_primitive,                  # Use the dataset primitive's default overlay hint
+#       OPTION1 => VALUE1,                   # Note that this can also be a hash if preferred (but not both)
+#   )
+#
+# Note that the last dataset object specified will be the 
+# active dataset in the sequence.
+#
+    my $pkg = shift;
+
+    my @ovl_primitives;
+    while ( @_ ) {
+        my $k = $_[0];
+
+# Rack the objects
+        if ( 
+            UNIVERSAL::isa( $k, 'Geo::Graph::Dataset' ) or
+            UNIVERSAL::isa( $k, 'Geo::Graph::Dataset::Primitive' )
+        ) {
+            push @ovl_primitives, [shift()];
+        }
+
+        elsif ( $k and not ref $k ) {
+# Handle how constants are not functional when DATASET_XXX => value
+# is used in hash context
+            $k =~ /^OVERLAY_/ and $k = $Geo::Graph::CONSTANTS_LOOKUP->{$k};
+
+# must be pointing to some package
+            last unless $k and $k =~ /^\w+(::\w+)*$/; 
+
+            my ( $junk, $dataset_primitive ) = splice @_, 0, 2;
+            push @ovl_primitives, [ $k, $dataset_primitive ];
+        }
+
+        else { last }
+    }
+
+# Initialize our object
+    my $self = $pkg->SUPER::new(@_);
+
+# If any primitives need instantiation, we'll do so here
+    HANDLE_PRIMITIVES: {
+        @ovl_primitives or last HANDLE_PRIMITIVES;
+        for my $ovl_primitive_options ( @ovl_primitives ) {
+            $self->overlay_create(@$ovl_primitive_options);
+        };
+    };
+
+    return $self;
+}
+
+sub load {
+# --------------------------------------------------
+# A possibly useful macro to load a dataset into
+# a new overlay object
+#
+    my ( $self, $data, $opts ) = @_;
+    require Geo::Graph::Datasource;
+    my $ds = Geo::Graph::Datasource->load($data,$opts) or return;
+    ref $self or $self = $self->new($ds,$opts);
+    return $self;
+}
+
+sub overlay_create {
+# --------------------------------------------------
+#
+    my ( $self ) = shift;
+
+    return unless @_;
+
+    my ( $primitive, $dataset_primitive );
+# Handle syntax in the form
+#       OVERLAY_TRACK => $dataset_primitive, # Associate a dataset_primitive primitive with a particular overlay object
+    if ( not ref $_[0] ) {
+
+        $primitive = shift;
+        $dataset_primitive   = shift or return;
+
+# Handle how constants are not functional when DATASET_XXX => value
+# is used in hash context
+        $primitive =~ /^OVERLAY_/ and $primitive = $Geo::Graph::CONSTANTS_LOOKUP->{$primitive};
+    }
+
+# Handle syntax in the form
+#       $dataset_primitive,                  # Use the dataset_primitive primitive's default overlay hint
+    elsif ( UNIVERSAL::isa($_[0],'Geo::Graph::Dataset::Primitive') ) {
+        $dataset_primitive   = shift;
+        $primitive = $dataset_primitive->{overlay_hint};
+    }
+
+# Handle syntax in the form
+#       $dataset_primitive,                            # This can be a Geo::Graph::Dataset object
+    elsif ( UNIVERSAL::isa($_[0],'Geo::Graph::Dataset') ) {
+        my $dataset = shift;
+        $dataset->iterator_reset;
+        while ( my $dataset_primitive = $dataset->iterator_next ) {
+            $self->overlay_create($dataset_primitive);
+        }
+        return;
+    }
+
+# Now load the overlay primitive
+    eval "require $primitive; 1" or  do{
+        die "Could not load '$primitive' because $@";
+    };
+    no strict 'refs';
+    my $ovl_primitive = $primitive->new( dataset_primitive => $dataset_primitive, @_ );
+    use strict 'refs';
+
+# Add it to our stack...
+    $self->overlay_insert($ovl_primitive);
+
+    return $ovl_primitive;
+}
+
+sub overlay_insert {
+# --------------------------------------------------
+# Insert a new overlay
+#
+    my $self = shift;
+    return push @{$self->{overlay_primitives}}, @_;
+}
+
+sub load_dataset {
+# --------------------------------------------------
+# This associates a dataset with an overlay object.
+# The input can be a file path, raw text, or another
+# dataset itself.
+#
+    my ( $self, $dataset, $opts ) = @_;
+
+# Iterate through each dataset primitive associating
+# the dataset primitive with a particular overly as
+# required
+    $dataset->iterator_reset;
+    while ( my $ds_primitive = $dataset->iterator_next ) {
+    }
+}
+
+sub load_dataset_primitive {
+# --------------------------------------------------
+# Load a single dataset primitive into this overlay
+# collection
+#
+    my ( $self, $ds_primitive, $overlay_object ) = @_;
+}
 
 sub data_load {
 # --------------------------------------------------
@@ -16,23 +173,7 @@ sub data_load {
 # The input can be a file path, raw text, or another
 # dataset itself.
 #
-    my ( $self, $data_in ) = @_;
-    $data_in ||= $self->{dataset} or return;
 
-# Now we try to figure out what sort of data this is
-    LOAD: {
-        if ( UNIVERSAL::isa( $data_in, 'Geo::Graph::Dataset' ) ) {
-            last;
-        }
-
-# Load the data if available
-# Assume the data is in GPX format
-        require Geo::Graph::Dataset::GPX;
-        $data_in = Geo::Graph::Dataset::GPX->load( $data_in ) or return;
-    };
-
-# Record the new dataset
-    return $self->{dataset} = $data_in;
 }
 
 sub range {
@@ -48,16 +189,10 @@ sub range {
 # 5. max longitude
 # 6. max altitude
 #
-    my ( $self ) = shift;
-    die ref($self)."::extent has not been defined yet.";
-    return;
 }
 
 sub canvas_draw {
 # --------------------------------------------------
-    my ( $self ) = shift;
-    die ref($self)."::canvas_draw has not been defined yet.";
-    return;
 }
 
 1;
