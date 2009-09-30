@@ -4,7 +4,7 @@ use strict;
 use vars qw/ $HAS_GPSBABEL $HANDLER_MAP $HANDLER_DEFAULT /;
 
 $HANDLER_MAP = {
-    gpx => 'Geo::Graph::Datasource::GPX',
+    gpx => 'Geo::Graph::Datasource::Format::GPX',
 };
 $HANDLER_DEFAULT = 'Geo::Graph::Datasource::GPSBabel';
 use Geo::Graph qw/ :constants /;
@@ -24,7 +24,7 @@ sub init {
     my $handler_map_new = $opts->{handler_map} ||= {};
     @$handler_map{keys %$handler_map_new} = values %$handler_map_new;
     $opts->{handler_map} = $handler_map;
-    
+
     return $self->init_instance_attribs($opts);
 }
 
@@ -40,7 +40,6 @@ sub load {
     my ( $self, $data ) = @_;
 
     ref $self or $self = $self->new;
-    $data ||= $self->{data} or return;
 
     my $data_processor = '';
     LOAD_ATTEMPT : {
@@ -56,6 +55,7 @@ sub load {
             -f $data and 
             my $format = $self->fpath_format_detect( $data ) 
         ) {
+
             $data_processor = $self->{handler_map}{$format} || $self->{handler_default} || '';
             last;
         }

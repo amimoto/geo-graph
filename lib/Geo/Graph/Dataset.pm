@@ -91,6 +91,40 @@ sub datasets {
     return 0+@{$self->{datasets}};
 }
 
+sub dataset_create {
+# --------------------------------------------------
+# Inserts a new dataset based upon the method,options
+# syntax. 
+#
+# eg:
+# 
+# my $ds = $obj->dataset_create( DATASET_SHAPE => [ ...data... ] );
+#
+    my ( $self, $primitive ) = splice @_, 0, 2;
+
+# Handle how constants are not functional when DATASET_XXX => value
+# is used in hash context
+    $primitive =~ /^DATASET_/ and $primitive = $Geo::Graph::CONSTANTS_LOOKUP->{$primitive};
+
+# Load the dataset primitive library
+    eval "require $primitive; 1" or  do{
+        die "Could not load '$primitive' because $@";
+    };
+
+# Create the object
+    no strict 'refs';
+    my $data_primitive = $primitive->new(@_) or return;
+    use strict 'refs';
+
+# Add the dataset to the local object and select the new dataset
+# as the active
+    my $data_primitive_obj = $self->dataset_insert( $data_primitive );
+    $self->dataset_select( $self->datasets-1 ); # zero-index so...
+
+# Done.
+    return $data_primitive_obj;
+}
+
 sub dataset_insert {
 # --------------------------------------------------
 # Insert a new dataset
