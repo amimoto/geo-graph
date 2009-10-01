@@ -14,7 +14,6 @@ use constant ( $CONSTANTS_LOOKUP = {
         OVERLAY_IMAGE        => 'Geo::Graph::Overlay::Primitive::Image',
         OVERLAY_REGION       => 'Geo::Graph::Overlay::Primitive::Region',
 
-
         SHAPE_TRACK          => 'Geo::Graph::Overlay::Track',
         SHAPE_POINT          => 'Geo::Graph::Overlay::Point',
         SHAPE_IMAGE          => 'Geo::Graph::Overlay::Image',

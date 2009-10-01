@@ -1,12 +1,13 @@
 package Geo::Graph::Overlay;
 
 use strict;
+use Geo::Graph qw/ :constants /;
 use Geo::Graph::Base
     ISA => 'Geo::Graph::Base',
     GEO_ATTRIBS => {
-        name               => undef, # if you want to name an overlay
         overlay_primitives => [],
-        range              => undef, # [0,0,0 => 0,0,0],
+        overlay_selected   => undef,
+        iterator_index     => 0,
     };
 
 sub new {
@@ -143,6 +144,45 @@ sub overlay_insert {
     return push @{$self->{overlay_primitives}}, @_;
 }
 
+sub overlays {
+# --------------------------------------------------
+# Returns the number of overlay primitives on the system
+#
+    my $self = shift;
+    return 0+@{$self->{overlay_primitives}};
+}
+
+sub iterator_reset {
+# --------------------------------------------------
+# Moves the iterator index to the first entry in the
+# list
+#
+    $_[0]->{iterator_index} = 0;
+    return 1;
+}
+
+sub iterator_next {
+# --------------------------------------------------
+# Yields the record the iterator index is currently
+# pointing to. Also increments the iterator index.
+# Each record returned should be simply a dataset
+# primitive
+    my ( $self ) = @_;
+    return unless ref $self->{overlay_primitives} eq 'ARRAY';
+    return if $self->overlays <= $self->{iterator_index};
+    return $self->{overlay_primitives}[$self->{iterator_index}++];
+}
+
+sub iterator_eof {
+# --------------------------------------------------
+# Returns a true value if the iterator index has reached
+# the limit of the records in this dataset
+#
+    my ( $self ) = @_;
+    return unless ref $self->{overlay_primitives} eq 'ARRAY';
+    return $self->overlays <= $self->{iterator_index};
+}
+
 sub load_dataset {
 # --------------------------------------------------
 # This associates a dataset with an overlay object.
@@ -173,7 +213,6 @@ sub data_load {
 # The input can be a file path, raw text, or another
 # dataset itself.
 #
-
 }
 
 sub range {
@@ -189,10 +228,51 @@ sub range {
 # 5. max longitude
 # 6. max altitude
 #
+    my $self = shift;
+    my $overlays = $self->{overlay_primitives} or return;
+
+    my @graph_range = qw( 10000 10000 10000 -10000 -10000 -10000  );
+
+    for my $overlay (@$overlays) {
+        my $overlay_range = $overlay->range;
+
+# Handle latitude range
+        if ( $graph_range[RANGE_MIN_LAT] > $overlay_range->[RANGE_MIN_LAT] ) {
+            $graph_range[RANGE_MIN_LAT] = $overlay_range->[RANGE_MIN_LAT];
+        }
+        if ( $graph_range[RANGE_MAX_LAT] < $overlay_range->[RANGE_MAX_LAT] ) {
+            $graph_range[RANGE_MAX_LAT] = $overlay_range->[RANGE_MAX_LAT];
+        }
+
+# Handle longitude range
+        if ( $graph_range[RANGE_MIN_LON] > $overlay_range->[RANGE_MIN_LON] ) {
+            $graph_range[RANGE_MIN_LON] = $overlay_range->[RANGE_MIN_LON];
+        }
+        if ( $graph_range[RANGE_MAX_LON] < $overlay_range->[RANGE_MAX_LON] ) {
+            $graph_range[RANGE_MAX_LON] = $overlay_range->[RANGE_MAX_LON];
+        }
+
+# Handle altitudinal range
+        if ( $graph_range[RANGE_MIN_ALT] > $overlay_range->[RANGE_MIN_ALT] ) {
+            $graph_range[RANGE_MIN_ALT] = $overlay_range->[RANGE_MIN_ALT];
+        }
+        if ( $graph_range[RANGE_MAX_ALT] < $overlay_range->[RANGE_MAX_ALT] ) {
+            $graph_range[RANGE_MAX_ALT] = $overlay_range->[RANGE_MAX_ALT];
+        }
+    }
+
+    return \@graph_range;
 }
 
 sub canvas_draw {
 # --------------------------------------------------
+    my ( $self, $canvas_obj ) = @_;
+    my $overlays = $self->{overlay_primitives} or return;
+    my @graph_range = qw( 10000 10000 10000 -10000 -10000 -10000  );
+    for my $overlay (@$overlays) {
+        $overlay->canvas_draw($canvas_obj);
+    };
+    return 1;
 }
 
 1;

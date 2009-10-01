@@ -9,7 +9,7 @@ my $geo;
 eval { $geo = Geo::Graph->new };
 ok(!$@,"Loaded Geo::Graph okay <$@>");
 
-eval{ $geo->load('t/02.sample.gpx') };
+eval{ $geo->load('t/05.sample.gpx') };
 ok(!$@,"Loaded Sample track okay <$@>");
 
 my $png;
