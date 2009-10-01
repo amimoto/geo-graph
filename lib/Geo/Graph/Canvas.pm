@@ -118,26 +118,12 @@ sub coord_to_pixel {
 #
     my ( $self, $coord ) = @_;
 # TODO optimizations go here
-    my $coord_pixel = wgs84_to_cartesian( $coord, $self->{map_geometry} );
-    my $offset_x = $coord_pixel->[COORD_X] - $self->{viewport_geometry}[GEOMETRY_OFFSET_X];
-    my $offset_y = $self->{viewport_geometry}[GEOMETRY_OFFSET_Y] - $coord_pixel->[COORD_Y] + $self->{viewport_geometry}[GEOMETRY_HEIGHT];
-    return [ $offset_x, $offset_y ];
-}
-
-sub lat_pixel_resolution {
-# --------------------------------------------------
-# Returns latitudinal degrees a pixel spans
-#
-    my ( $self ) = @_;
-    return $self->{map_geometry}[GEOMETRY_HEIGHT]/$self->{viewport_geometry}[GEOMETRY_HEIGHT];
-}
-
-sub lon_pixel_resolution {
-# --------------------------------------------------
-# Returns longitudinal degrees a pixel spans
-#
-    my ( $self ) = @_;
-    return $self->{map_geometry}[GEOMETRY_WIDTH]/$self->{viewport_geometry}[GEOMETRY_WIDTH];
+    my $coord_pixel    = wgs84_to_cartesian( $coord, $self->{map_geometry} );
+    my $coord_y_offset = $self->{coord_y_offset} ||= ( $self->{viewport_geometry}[GEOMETRY_HEIGHT] + $self->{viewport_geometry}[GEOMETRY_OFFSET_Y] );
+    return [ 
+        $coord_pixel->[COORD_X] - $self->{viewport_geometry}[GEOMETRY_OFFSET_X],
+        $coord_y_offset - $coord_pixel->[COORD_Y]
+    ];
 }
 
 sub hsv_to_rgb {

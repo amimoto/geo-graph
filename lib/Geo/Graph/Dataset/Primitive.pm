@@ -94,7 +94,7 @@ sub iterator_next {
 #
     my ( $self ) = @_;
     return unless ref $self->{data} eq 'ARRAY';
-    return if $self->entries <= $self->{iterator_index};
+    return if $#{$self->{data}} < $self->{iterator_index};
     return $self->{data}[$self->{iterator_index}++];
 }
 

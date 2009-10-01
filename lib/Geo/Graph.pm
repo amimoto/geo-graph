@@ -286,13 +286,6 @@ sub png {
 # --------------------------------------------------
     my ( $self, $opts ) = @_;
     my $canvas_obj = $self->generate or return;
-
-
-open F, ">/tmp/out.png";
-binmode F;
-print F $canvas_obj->png;
-close F;
-
     return $canvas_obj->png;
 }
 

@@ -89,7 +89,7 @@ sub wgs84_to_cartesian ($;$){
 # Y gets complicated. Not only is there the transformation, 
 # but when using GD, the upper left hand corner is 0,0, not 
 # the center!
-    my $lat_radians = deg2rad($geo_coord->[COORD_LAT]);
+    my $lat_radians = $geo_coord->[COORD_LAT] / 180 * $PI;
     my $y      = ( log(tan($lat_radians)+sec($lat_radians)) / ( $PI * 2 ) + .5 ) * $height;
 
 # Done!

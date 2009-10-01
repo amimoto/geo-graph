@@ -7,6 +7,13 @@ use strict;
 # command which removes points based upon how much error it introduces
 # into the track.
 
+sub filter {
+# --------------------------------------------------
+# Run the filter
+#
+    my ( $self, $opts ) = @_;
+}
+
 sub thin {
 # --------------------------------------------------
 # Request the system to remove data points based
