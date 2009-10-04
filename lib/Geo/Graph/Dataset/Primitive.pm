@@ -59,7 +59,20 @@ sub filter {
 # current section
 #
     my ( $self, $filter_name, $opts ) = @_;
-    return; # filter not defined. Return undef
+
+# Handle how constants are not functional when DATASET_XXX => value
+# is used in hash context
+    $filter_name  =~ /^FILTER_/ and $filter_name = $Geo::Graph::CONSTANTS_LOOKUP->{$filter_name};
+    return unless $filter_name =~ /^\w+(::\w+)+$/;
+
+    eval "require $filter_name; 1" or do { 
+        die "Could not load $filter_name because $@"; 
+    };
+    no strict 'refs';
+    my $filter_obj = $filter_name->new($opts) or return die "Could not load $filter_name";
+    use strict 'refs';
+
+    return $filter_obj->filter($self);
 }
 
 sub entries {
@@ -89,6 +102,7 @@ sub iterator_next {
 #          $longitude,
 #          $latitude,
 #          $altitude,
+#          $timestamp,
 #          { additional metadata }
 #      ]
 #

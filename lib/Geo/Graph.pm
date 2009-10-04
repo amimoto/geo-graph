@@ -9,6 +9,10 @@ use constant ( $CONSTANTS_LOOKUP = {
         DATASET_SHAPE        => 'Geo::Graph::Dataset::Primitive::Shape',
         DATASET_WAYPOINTS    => 'Geo::Graph::Dataset::Primitive::Waypoints',
 
+        FILTER_CLEAN         => 'Geo::Graph::Dataset::Filter::Clean',
+        FILTER_SIMPLIFY      => 'Geo::Graph::Dataset::Filter::Simplify',
+        FILTER_ENRICH        => 'Geo::Graph::Dataset::Filter::Enrich',
+
         OVERLAY_TRACK        => 'Geo::Graph::Overlay::Primitive::Track',
         OVERLAY_POINT        => 'Geo::Graph::Overlay::Primitive::Point',
         OVERLAY_IMAGE        => 'Geo::Graph::Overlay::Primitive::Image',

@@ -52,7 +52,7 @@ sub new {
         $k =~ /^DATASET_/ and $k = $Geo::Graph::CONSTANTS_LOOKUP->{$k};
 
 # must be pointing to some package
-        last unless $k and $k =~ /::/; 
+        last unless $k and $k =~ /^\w+(::\w+)+$/; 
 
 # Get the primitives init parameters 
         my ( $primitive, $init_params ) = splice @_, 0, 2;

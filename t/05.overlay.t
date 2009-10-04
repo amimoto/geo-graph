@@ -6,6 +6,6 @@ use Geo::Graph qw/ :constants /;
 use Geo::Graph::Overlay;
 
 # Now load an example gpx track 
-my $ovl = eval { Geo::Graph::Overlay->load('t/03.sample.gpx') };
+my $ovl = eval { Geo::Graph::Overlay->load('t/sample1.gpx') };
 ok( $ovl, "Loaded okay! <$@>" );
 
