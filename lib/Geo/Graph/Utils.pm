@@ -15,6 +15,9 @@ $VERSION = '0.01';
                 wgs84_to_cartesian cartesian_to_wgs84 
             );
 $PI = 3.14159290045661;
+sub PI () { 3.14159290045661 };
+sub RADINDEG () { 3.14159290045661 * 2 / 360 };
+sub DEGINRAD () { 360 / 3.14159290045661 * 2 };
 
 ##################################################
 ## Distance calculator
@@ -50,8 +53,8 @@ sub coord_deg_to_rad ($;$) {
 #
     my ( $geo_coord ) = @_;
     my $rad_coord = [
-        deg2rad($geo_coord->[COORD_LON]),
-        deg2rad($geo_coord->[COORD_LAT])
+        RADINDEG * $geo_coord->[COORD_LON],
+        RADINDEG * $geo_coord->[COORD_LAT]
     ];
     return $rad_coord;
 }
@@ -63,8 +66,8 @@ sub coord_rad_to_deg ($;$) {
 #
     my ( $rad_coord ) = @_;
     my $geo_coord = [
-        deg2rad($rad_coord->[COORD_LON]),
-        deg2rad($rad_coord->[COORD_LAT])
+        RADINDEG * $rad_coord->[COORD_LON],
+        RADINDEG * $rad_coord->[COORD_LAT]
     ];
     return $geo_coord;
 }

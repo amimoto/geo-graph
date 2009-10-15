@@ -44,13 +44,24 @@ sub insert {
 
 sub splice {
 # --------------------------------------------------
-# Does the same thing as perl's splice on the
-# point data 
+# Does the (almost) the same thing as perl's splice 
+# on the point data. The big difference is that it
+# doesn't handle the lvalue magic
 #
 
 # We're simplifying
-#    my ( $self, @splice_data ) = @_;
-    return splice @{shift()->{data}}, @_;
+    my ( $self, @splice_data ) = @_;
+    return splice @{$self->{data}}, $_[1], $_[2];
+}
+
+sub get {
+# --------------------------------------------------
+# This fetches a particular anchor from the store
+# indexed by offset and returns the record in 
+# iterator format.
+#
+    my ( $self, $i ) = @_;
+    return $self->{data}[$i];
 }
 
 sub filter {
@@ -77,7 +88,9 @@ sub filter {
 
 sub entries {
 # --------------------------------------------------
-# Number of GPS points in the dataset
+# Number of GPS points in the dataset. Note that 
+# this counts from "1" and is not the last index
+# value. 
 #
     return 0+@{$_[0]->{data}||[]};
 }
@@ -107,7 +120,8 @@ sub iterator_next {
 #      ]
 #
     my ( $self ) = @_;
-    return unless ref $self->{data} eq 'ARRAY';
+# Toss this sanity check to speed things up
+#    return unless ref $self->{data} eq 'ARRAY';
     return if $#{$self->{data}} < $self->{iterator_index};
     return $self->{data}[$self->{iterator_index}++];
 }

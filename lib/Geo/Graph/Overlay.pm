@@ -79,7 +79,10 @@ sub load {
 #
     my ( $self, $data, $opts ) = @_;
     require Geo::Graph::Datasource;
-    my $ds = Geo::Graph::Datasource->load($data,$opts) or return;
+    my $ds = UNIVERSAL::isa( $data, 'Geo::Graph::Datasource' ) 
+                ? $data
+                : Geo::Graph::Datasource->load($data,$opts);
+       $ds or return;
     ref $self or $self = $self->new($ds,$opts);
     return $self;
 }
