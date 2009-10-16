@@ -8,7 +8,7 @@ use Geo::Graph::Dataset::Filter
     GEO_ATTRIBS => {
         accel_max    => 30,      # 30      m/s^2
         speed_max    => 300_000, # 300,000 m/s (speed of sound)
-        distance_max => 50,     # Maximum distance between any two points
+        distance_max => 0,       # Maximum distance between any two points
         anchor_min   => 5,       # minimum 5 points in the anchor
         entries_min  => 10,      # don't bother unless 
     };
@@ -72,9 +72,11 @@ sub filter {
 
     $ds_primitive->iterator_reset;
     my $coord_first = $ds_primitive->iterator_next;
+    my @distances;
     while ( my $coord = $ds_primitive->iterator_next ) {
         $i++;
         my $m = $coord->[REC_METADATA];
+        push @distances, $m->{distance_since_previous};
 
         if ( 
             ( $m->{velocity} <= $speed_max ) and
@@ -94,6 +96,14 @@ sub filter {
     $e and push @anchor_trace, [ $s, $e, $e - $s ];
     my $entries = $i;
 
+# We want to remove the top 1% of distance jumps
+    unless ( $distance_max ) {
+        my @distances_sorted = sort {$a<=>$b} @distances;
+        my $entries = 0+@distances_sorted;
+        my $base_proportion = int($entries*0.01);
+        $distance_max = $distances_sorted[-$base_proportion];
+    }
+
 # Now find the longest anchor trace from which we will work
 # going outwards
     my $anchor = [0,0,0];
@@ -112,6 +122,7 @@ sub filter {
     my $state              = 0;
     my $j                  = $anchor->[1];
     my $last_good_coord    = $ds_primitive->get($j-1);
+    my $distance_since_previous = 0;
 
 # Iterate through each to the end starting from the largest anchor
     while ( $j <= $entries ) {
@@ -120,12 +131,12 @@ sub filter {
         my $tdelta         = $last_good_coord ? $this_coord->[REC_TIMESTAMP] - $last_good_coord->[REC_TIMESTAMP] : 0;
         my $velocity       = $tdelta ? $distance / $tdelta : 0;
         my $accel          = $tdelta ? ( $velocity - $last_good_velocity ) / $tdelta : 0;
+        $distance_since_previous = $this_coord->[REC_METADATA]{distance_since_previous} || $distance_since_previous;
 
 # If this coordinate passes through our exceptions filter
-        if (
-            ( $velocity <= $speed_max ) and
-            ( $accel    <= $accel_max ) and
-            ( $distance <= $distance_max )
+        if ( ( $velocity <= $speed_max ) 
+            and ( $accel    <= $accel_max ) 
+            and $distance_since_previous < $distance_max
         ) {
             $last_good_j        = $j;
             $last_good_velocity = $velocity;
@@ -154,13 +165,12 @@ sub filter {
         my $tdelta         = $last_good_coord ? $this_coord->[REC_TIMESTAMP] - $last_good_coord->[REC_TIMESTAMP] : 0;
         my $velocity       = $tdelta ? $distance / $tdelta : 0;
         my $accel          = $tdelta ? ( $velocity - $last_good_velocity ) / $tdelta : 0;
+        $distance_since_previous = $this_coord->[REC_METADATA]{distance_since_previous} || $distance_since_previous;
 
 # If this coordinate passes through our exceptions filter
-        if (
-            ( $velocity <= $speed_max ) and
-            ( $accel    <= $accel_max ) and
-            ( $distance <= $distance_max )
-
+        if (    ( $velocity <= $speed_max ) 
+            and ( $accel    <= $accel_max ) 
+            and $distance_since_previous < $distance_max
         ) {
             $last_good_j        = $j;
             $last_good_velocity = $velocity;
