@@ -19,6 +19,29 @@ sub range {
     return $self->{range} ||= $dataset->range;
 }
 
+sub colour {
+# --------------------------------------------------
+# Getter/setter of colour attribute
+#
+    my $self = shift;
+    if ( @_ ) {
+        $self->{colour} = shift;
+    }
+    return $self->{colour};
+}
+
+sub thickness {
+# --------------------------------------------------
+# Getter/setter of thickness attribute
+#
+    my $self = shift;
+    if ( @_ ) {
+        $self->{thickness} = shift;
+    }
+    return $self->{thickness};
+}
+
+
 sub canvas_draw {
 # --------------------------------------------------
 # Draw the tracks on the map
@@ -29,8 +52,9 @@ sub canvas_draw {
 
     $dataset->iterator_reset;
     my $prev_entry = $dataset->iterator_next;
+    warn "THICK: $self->{thickness}\n";
     $canvas_obj->setThickness($self->{thickness}||2);
-    my $rgb = $self->{colour};
+    my $rgb = $self->colour;
     while ( my $entry = $dataset->iterator_next ) {
         my $segment_colour = ref $rgb eq 'CODE' ? $rgb->( $prev_entry, $entry, $canvas_obj ) : $rgb;
         $canvas_obj->line(

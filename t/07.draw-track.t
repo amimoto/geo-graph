@@ -1,25 +1,28 @@
-#!/usr/bin/perl
-
 use strict;
-use lib '../lib';
-use Geo::Graph qw/:all/;
-use Geo::Graph::Datasource;
 
-my $fpath = shift @ARGV;
+use Geo::Graph qw/:all/;
+use Test::More tests => 5;
+use vars qw/ $I /;
 
 $ENV{GEO_GRAPH_CACHE_PATH} = "/home/aki/projects/cache";
 
-my $ds = Geo::Graph::Datasource->load($fpath);
-   $ds->filter( FILTER_CLEAN );
+require_ok('Geo::Graph::Canvas');
 
-my $geo = Geo::Graph->new;
-   $geo->load($ds);
+my $geo;
+eval { $geo = Geo::Graph->new };
+ok(!$@,"Loaded Geo::Graph okay <$@>");
 
-# Let's just assume that the distribution is normalized (in actuality,
-# it's bimodal but we'll ignore that here)
+eval{ $geo->load('t/sample1.gpx') };
+ok(!$@,"Loaded Sample track okay <$@>");
+
+# now we recolour the line based upon how fast we were going
 my $overlay           = $geo->overlay_get(0);
 my $overlay_primitive = $overlay->overlay_primitive_get(0);
 my $dataset_primitive = $overlay_primitive->dataset_primitive;
+$dataset_primitive->filter(FILTER_CLEAN => { speed_max => 10 });
+
+# Let's just assume that the distribution is normalized (in actuality,
+# it's bimodal but we'll ignore that here)
 my $m = $dataset_primitive->{_metadata};
 my $d = $m->{velocity_max} - $m->{velocity_min};
 
@@ -56,9 +59,13 @@ $overlay_primitive->colour(sub{
     return [$r,0,$b];
 });
 
-my $png = $geo->png;
+my $png;
+eval{ $png = $geo->png };
+ok(!$@,"PNG creation ran okay <$@>");
+ok( ($png and !ref($png)), "PNG created" );
 
-open F, ">out.png";
+open F, ">/tmp/out.png";
 binmode F;
 print F $png;
 close F;
+

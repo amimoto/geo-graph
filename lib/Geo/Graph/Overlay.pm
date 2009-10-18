@@ -65,7 +65,7 @@ sub new {
     HANDLE_PRIMITIVES: {
         @ovl_primitives or last HANDLE_PRIMITIVES;
         for my $ovl_primitive_options ( @ovl_primitives ) {
-            $self->overlay_create(@$ovl_primitive_options);
+            $self->overlay_primitive_create(@$ovl_primitive_options);
         };
     };
 
@@ -87,7 +87,7 @@ sub load {
     return $self;
 }
 
-sub overlay_create {
+sub overlay_primitive_create {
 # --------------------------------------------------
 #
     my ( $self ) = shift;
@@ -120,7 +120,7 @@ sub overlay_create {
         my $dataset = shift;
         $dataset->iterator_reset;
         while ( my $dataset_primitive = $dataset->iterator_next ) {
-            $self->overlay_create($dataset_primitive);
+            $self->overlay_primitive_create($dataset_primitive);
         }
         return;
     }
@@ -134,12 +134,12 @@ sub overlay_create {
     use strict 'refs';
 
 # Add it to our stack...
-    $self->overlay_insert($ovl_primitive);
+    $self->overlay_primitive_insert($ovl_primitive);
 
     return $ovl_primitive;
 }
 
-sub overlay_insert {
+sub overlay_primitive_insert {
 # --------------------------------------------------
 # Insert a new overlay
 #
@@ -147,12 +147,22 @@ sub overlay_insert {
     return push @{$self->{overlay_primitives}}, @_;
 }
 
-sub overlays {
+sub overlay_primitives {
 # --------------------------------------------------
 # Returns the number of overlay primitives on the system
 #
     my $self = shift;
     return 0+@{$self->{overlay_primitives}};
+}
+
+sub overlay_primitive_get {
+# --------------------------------------------------
+# Fetch a single overlay by index 
+#
+    my ( $self, $i ) = @_;
+    return unless $self->overlay_primitives;
+    return unless $i < $self->overlay_primitives;
+    return $self->{overlay_primitives}[$i];
 }
 
 sub iterator_reset {
@@ -172,7 +182,7 @@ sub iterator_next {
 # primitive
     my ( $self ) = @_;
     return unless ref $self->{overlay_primitives} eq 'ARRAY';
-    return if $self->overlays <= $self->{iterator_index};
+    return if $self->overlay_primitives <= $self->{iterator_index};
     return $self->{overlay_primitives}[$self->{iterator_index}++];
 }
 
@@ -183,7 +193,7 @@ sub iterator_eof {
 #
     my ( $self ) = @_;
     return unless ref $self->{overlay_primitives} eq 'ARRAY';
-    return $self->overlays <= $self->{iterator_index};
+    return $self->overlay_primitives <= $self->{iterator_index};
 }
 
 sub load_dataset {

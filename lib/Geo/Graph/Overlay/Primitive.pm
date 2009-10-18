@@ -37,6 +37,15 @@ sub range {
     return;
 }
 
+sub dataset_primitive {
+# --------------------------------------------------
+# Get/set dataset primitive for this primitive
+#
+    my $self = shift;
+    if ( @_ ) { $self->{dataset_primitive} = shift };
+    return $self->{dataset_primitive};
+}
+
 sub canvas_draw {
 # --------------------------------------------------
     my ( $self ) = shift;

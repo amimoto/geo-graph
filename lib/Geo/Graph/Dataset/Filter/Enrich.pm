@@ -25,6 +25,12 @@ sub filter {
     my $coord_prev     = $ds_primitive->iterator_next;
     my $time_total     = 0;
     my $distance_total = 0;
+
+    my $velocity_max = undef;
+    my $velocity_min = undef;
+    my $accel_max    = undef;
+    my $accel_min    = undef;
+
     while ( my $coord = $ds_primitive->iterator_next ) {
         my $distance = distance($coord_prev,$coord);
         my $tvector  = $coord->[REC_TIMESTAMP] - $coord_prev->[REC_TIMESTAMP];
@@ -36,14 +42,35 @@ sub filter {
 # mechanism
         my $metadata = $coord->[REC_METADATA];
         $metadata->{distance_since_previous} = $distance;
-        $metadata->{distance} = $distance_total += $distance;
-        $metadata->{runtime_since_previous} = $tvector;
-        $metadata->{runtime}  = $time_total += $tvector;
-        $metadata->{velocity} = $velocity;
-        $metadata->{accel}    = $accel;
+        $metadata->{distance}                = $distance_total += $distance;
+        $metadata->{runtime_since_previous}  = $tvector;
+        $metadata->{runtime}                 = $time_total += $tvector;
+        $metadata->{velocity}                = $velocity;
+        $metadata->{accel}                   = $accel;
+
+# Get the numerical ranges now...
+        if ( not defined $velocity_max or $velocity_max < $velocity ) {
+            $velocity_max = $velocity;
+        };
+        if ( not defined $velocity_min or $velocity_min > $velocity ) {
+            $velocity_min = $velocity;
+        };
+        if ( not defined $accel_max or $accel_max < $accel ) {
+            $accel_max = $accel;
+        };
+        if ( not defined $accel_min or $accel_min > $accel ) {
+            $accel_min = $accel;
+        };
 
         $coord_prev = $coord;
     };
+
+    my $metadata = $ds_primitive->{_metadata} ||= {};
+    $metadata->{velocity_max} = $velocity_max;
+    $metadata->{velocity_min} = $velocity_min;
+    $metadata->{velocity_avg} = $distance_total / $time_total;
+    $metadata->{accel_max}    = $accel_max;
+    $metadata->{accel_min}    = $accel_min;
 
     return $ds_primitive;
 }

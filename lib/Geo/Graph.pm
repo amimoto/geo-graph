@@ -99,6 +99,7 @@ $GEO_ATTRIBS = {
 
     overlays          => [],
     viewport_geometry => VIEWPORT_GEOMETRY_DEFAULT, # the size of the image that will be generated
+    iterator_index    => 0,
 };
 
 sub new {
@@ -159,6 +160,56 @@ sub overlay {
 
 # We're done.
     return 0+@{$self->{overlays}};
+}
+
+sub overlays {
+# --------------------------------------------------
+# Returns the number of overlays that this system
+# is handling
+#
+    my $self = shift;
+    return 0+@{$self->{overlays}};
+}
+
+sub overlay_get {
+# --------------------------------------------------
+# Fetch a single overlay by index 
+#
+    my ( $self, $i ) = @_;
+    return unless $self->overlays;
+    return unless $i < $self->overlays;
+    return $self->{overlays}[$i];
+}
+
+sub iterator_reset {
+# --------------------------------------------------
+# Moves the iterator index to the first entry in the
+# list
+#
+    $_[0]->{iterator_index} = 0;
+    return 1;
+}
+
+sub iterator_next {
+# --------------------------------------------------
+# Yields the record the iterator index is currently
+# pointing to. Also increments the iterator index.
+# Each record returned should be simply a dataset
+# primitive
+    my ( $self ) = @_;
+    return unless ref $self->{overlays} eq 'ARRAY';
+    return if $self->overlays <= $self->{iterator_index};
+    return $self->{overlays}[$self->{iterator_index}++];
+}
+
+sub iterator_eof {
+# --------------------------------------------------
+# Returns a true value if the iterator index has reached
+# the limit of the records in this dataset
+#
+    my ( $self ) = @_;
+    return unless ref $self->{overlays} eq 'ARRAY';
+    return $self->overlays <= $self->{iterator_index};
 }
 
 sub range {

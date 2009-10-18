@@ -185,11 +185,13 @@ sub filter {
         $j--;
     };
 
-
 # Now remove the troublesome entries
     for my $id ( sort {$b<=>$a} @drop_ids ) {
         $ds_primitive->splice( $id, 1 );
     }
+
+# Cleanup velocity/accel/etc data 
+    $ds_primitive->filter(FILTER_ENRICH);
 
     return $self;
 }
